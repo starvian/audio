@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusFIX — Ultra-Low Latency FIX Engine | C++Online 2026 Poster</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap');
+
+  :root {
+    --blue-dark: #0A1628;
+    --blue-primary: #0D47A1;
+    --blue-accent: #1565C0;
+    --blue-light: #E3F2FD;
+    --blue-cpp: #00599C;
+    --cyan: #00BCD4;
+    --cyan-light: #80DEEA;
+    --green: #00E676;
+    --green-dark: #00C853;
+    --orange: #FF6F00;
+    --orange-light: #FFB74D;
+    --red: #FF5252;
+    --gray-900: #121212;
+    --gray-800: #1E1E1E;
+    --gray-700: #2D2D2D;
+    --gray-400: #9E9E9E;
+    --gray-200: #EEEEEE;
+    --gray-100: #F5F5F5;
+    --white: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--gray-900);
+    color: var(--white);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .poster {
+    width: 1600px;
+    min-height: 900px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, var(--blue-dark) 0%, #0F2237 50%, #0A1628 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle grid background */
+  .poster::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Glow effect */
+  .poster::after {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,188,212,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 40px 50px 30px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid rgba(0,188,212,0.3);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .logo {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--blue-accent) 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--white);
+    box-shadow: 0 4px 20px rgba(0,188,212,0.3);
+  }
+
+  .header-title h1 {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: linear-gradient(90deg, var(--white) 0%, var(--cyan-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-title .subtitle {
+    font-size: 16px;
+    color: var(--cyan);
+    font-weight: 400;
+    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .conf-badge {
+    background: rgba(0,188,212,0.15);
+    border: 1px solid rgba(0,188,212,0.3);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    color: var(--cyan-light);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .author {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--gray-400);
+  }
+
+  /* ===== HERO STATS ===== */
+  .hero-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--cyan), var(--blue-accent)); }
+  .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--green), var(--green-dark)); }
+  .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--orange-light), var(--orange)); }
+  .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--cyan-light), var(--cyan)); }
+
+  .stat-number {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-card:nth-child(1) .stat-number { color: var(--cyan); }
+  .stat-card:nth-child(2) .stat-number { color: var(--green); }
+  .stat-card:nth-child(3) .stat-number { color: var(--orange-light); }
+  .stat-card:nth-child(4) .stat-number { color: var(--cyan-light); }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .stat-detail {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 4px;
+  }
+
+  /* ===== MAIN GRID ===== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+  }
+
+  .card-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .icon {
+    width: 20px; height: 20px;
+    background: rgba(0,188,212,0.2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  /* ===== FEATURES LIST ===== */
+  .features-list {
+    list-style: none;
+  }
+
+  .features-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .features-list .feat-icon {
+    width: 22px; height: 22px;
+    min-width: 22px;
+    background: rgba(0,230,118,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--green);
+    margin-top: 1px;
+  }
+
+  .feat-keyword {
+    color: var(--cyan-light);
+    font-weight: 600;
+  }
+
+  /* ===== BENCHMARK CHART ===== */
+  .chart-container {
+    width: 100%;
+  }
+
+  .chart-section-title {
+    font-size: 11px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    margin-top: 16px;
+    font-weight: 600;
+  }
+
+  .chart-section-title:first-child { margin-top: 0; }
+
+  .bar-group {
+    margin-bottom: 8px;
+  }
+
+  .bar-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bar-row .bar-name {
+    min-width: 155px;
+    width: 155px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-align: right;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .bar-row .bar-name.highlight {
+    color: var(--cyan-light);
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--white);
+    position: relative;
+  }
+
+  .bar-fill.nexus {
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--blue-accent) 100%);
+  }
+
+  .bar-fill.quickfix {
+    background: linear-gradient(90deg, var(--gray-400) 0%, #757575 100%);
+  }
+
+  .bar-fill.fix8 {
+    background: linear-gradient(90deg, #78909C 0%, #546E7A 100%);
+  }
+
+  .bar-row .bar-value {
+    min-width: 60px;
+    width: 60px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .bar-row .bar-value.highlight {
+    color: var(--cyan-light);
+  }
+
+  .speedup-badge {
+    min-width: 72px;
+    width: 72px;
+    font-size: 10px;
+    color: var(--green);
+    font-weight: 700;
+    text-align: right;
+  }
+
+  /* ===== OPTIMIZATION JOURNEY ===== */
+  .journey-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .journey-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .step-num {
+    width: 22px; height: 22px;
+    min-width: 22px;
+    background: rgba(0,188,212,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+
+  .step-bar-track {
+    flex: 1;
+    height: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .step-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--blue-accent));
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .step-label {
+    width: 160px;
+    min-width: 160px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .step-ns {
+    width: 55px;
+    min-width: 55px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cyan-light);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== CODE BLOCK ===== */
+  .code-block {
+    background: var(--gray-800);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    overflow: hidden;
+    white-space: pre;
+  }
+
+  .code-block .kw { color: #C792EA; }
+  .code-block .fn { color: #82AAFF; }
+  .code-block .str { color: #C3E88D; }
+  .code-block .cmt { color: #546E7A; font-style: italic; }
+  .code-block .type { color: #FFCB6B; }
+  .code-block .num { color: #F78C6C; }
+  .code-block .op { color: #89DDFF; }
+  .code-block .var { color: #EEFFFF; }
+
+  /* ===== ARCHITECTURE ===== */
+  .arch-svg { width: 100%; }
+
+  /* ===== BOTTOM SECTION ===== */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* ===== C++ FEATURES ===== */
+  .cpp-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .cpp-tag {
+    background: rgba(0,89,156,0.2);
+    border: 1px solid rgba(0,89,156,0.3);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--cyan-light);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  /* ===== USE CASES ===== */
+  .use-case-list {
+    list-style: none;
+  }
+
+  .use-case-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .uc-icon {
+    width: 32px; height: 32px;
+    min-width: 32px;
+    background: rgba(0,188,212,0.1);
+    border: 1px solid rgba(0,188,212,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ===== LINKS ===== */
+  .links-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .link-icon {
+    width: 36px; height: 36px;
+    min-width: 36px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .link-text {
+    font-size: 12px;
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .link-url {
+    font-size: 10px;
+    color: var(--gray-400);
+    font-family: 'JetBrains Mono', monospace;
+    word-break: break-all;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--gray-400);
+  }
+
+  .footer-tags {
+    display: flex;
+    gap: 8px;
+  }
+
+  .footer-tag {
+    background: rgba(255,255,255,0.05);
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+  }
+
+  /* ===== PRINT ===== */
+  @media print {
+    body { background: var(--gray-900); }
+    .poster {
+      width: 100%;
+      page-break-inside: avoid;
+    }
+    @page {
+      size: landscape;
+      margin: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="poster">
+<div class="content">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">NF</div>
+      <div class="header-title">
+        <h1>NexusFIX</h1>
+        <div class="subtitle">Ultra-Low Latency FIX Engine for Quantitative Trading</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="conf-badge">C++Online 2026</div>
+      <div class="author">Alan &middot; SilverstreamsAI &middot; MIT License</div>
+    </div>
+  </div>
+
+  <!-- ===== HERO STATS ===== -->
+  <div class="hero-stats">
+    <div class="stat-card">
+      <div class="stat-number">3x</div>
+      <div class="stat-label">Faster than QuickFIX</div>
+      <div class="stat-detail">246 ns vs 730 ns mean parse</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">7.5x</div>
+      <div class="stat-label">Faster than Fix8</div>
+      <div class="stat-detail">193 ns vs 1,453 ns P50 latency</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">4.17M</div>
+      <div class="stat-label">Messages / Second</div>
+      <div class="stat-detail">687 MB/s bandwidth</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Heap Allocations</div>
+      <div class="stat-detail">Zero-alloc critical path</div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN 3-COLUMN GRID ===== -->
+  <div class="main-grid">
+
+    <!-- LEFT: Features + C++23 -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#9881;</span> Core Advantages</div>
+        <ul class="features-list">
+          <li>
+            <span class="feat-icon">&#10003;</span>
+            <span><span class="feat-keyword">Zero-Copy Parsing</span> &mdash; std::span views into raw buffer, no string copies</span>
+          </li>
+          <li>
+            <span class="feat-icon">&#10003;</span>
+            <span><span class="feat-keyword">O(1) Field Lookup</span> &mdash; Direct array indexing by FIX tag number</span>
+          </li>
+          <li>
+            <span class="feat-icon">&#10003;</span>
+            <span><span class="feat-keyword">SIMD Scanning</span> &mdash; AVX2 delimiter detection, up to 14.7x on large buffers</span>
+          </li>
+          <li>
+            <span class="feat-icon">&#10003;</span>
+            <span><span class="feat-keyword">Compile-Time Offsets</span> &mdash; consteval field tables, zero runtime cost</span>
+          </li>
+          <li>
+            <span class="feat-icon">&#10003;</span>
+            <span><span class="feat-keyword">No Heap Allocation</span> &mdash; PMR arena pools + SessionHeap (mimalloc)</span>
+          </li>
+          <li>
+            <span class="feat-icon">&#10003;</span>
+            <span><span class="feat-keyword">Cache-Line Aligned</span> &mdash; alignas(64), branch hints, LTO</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">&#9830;</span> Modern C++23</div>
+        <div class="cpp-tags">
+          <span class="cpp-tag">consteval</span>
+          <span class="cpp-tag">std::span</span>
+          <span class="cpp-tag">std::expected</span>
+          <span class="cpp-tag">concepts</span>
+          <span class="cpp-tag">std::variant</span>
+          <span class="cpp-tag">string_view</span>
+          <span class="cpp-tag">PMR</span>
+          <span class="cpp-tag">[[likely]]</span>
+          <span class="cpp-tag">assume_aligned</span>
+          <span class="cpp-tag">co_await</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: Benchmark Charts -->
+    <div class="card">
+      <div class="card-title"><span class="icon">&#9632;</span> Performance Benchmarks</div>
+      <div class="chart-container">
+
+        <div class="chart-section-title">ExecutionReport Parse Latency (Mean)</div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name">QuickFIX</span>
+            <div class="bar-track"><div class="bar-fill quickfix" style="width:100%"></div></div>
+            <span class="bar-value">730 ns</span>
+            <span class="speedup-badge"></span>
+          </div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name highlight">NexusFIX</span>
+            <div class="bar-track"><div class="bar-fill nexus" style="width:33.7%"></div></div>
+            <span class="bar-value highlight">246 ns</span>
+            <span class="speedup-badge">3.0x faster</span>
+          </div>
+        </div>
+
+        <div class="chart-section-title">P50 Latency vs Fix8</div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name">Fix8</span>
+            <div class="bar-track"><div class="bar-fill fix8" style="width:100%"></div></div>
+            <span class="bar-value">1,453 ns</span>
+            <span class="speedup-badge"></span>
+          </div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name highlight">NexusFIX</span>
+            <div class="bar-track"><div class="bar-fill nexus" style="width:13.3%"></div></div>
+            <span class="bar-value highlight">193 ns</span>
+            <span class="speedup-badge">7.5x faster</span>
+          </div>
+        </div>
+
+        <div class="chart-section-title">Throughput (msg/sec)</div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name">QuickFIX</span>
+            <div class="bar-track"><div class="bar-fill quickfix" style="width:28.5%"></div></div>
+            <span class="bar-value">1.19M</span>
+            <span class="speedup-badge"></span>
+          </div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name highlight">NexusFIX</span>
+            <div class="bar-track"><div class="bar-fill nexus" style="width:100%"></div></div>
+            <span class="bar-value highlight">4.17M</span>
+            <span class="speedup-badge">3.5x faster</span>
+          </div>
+        </div>
+
+        <div class="chart-section-title">P99 Tail Latency</div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name">QuickFIX P99</span>
+            <div class="bar-track"><div class="bar-fill quickfix" style="width:100%"></div></div>
+            <span class="bar-value">784 ns</span>
+            <span class="speedup-badge"></span>
+          </div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-row">
+            <span class="bar-name highlight">NexusFIX P99</span>
+            <div class="bar-track"><div class="bar-fill nexus" style="width:32.9%"></div></div>
+            <span class="bar-value highlight">258 ns</span>
+            <span class="speedup-badge">3.0x lower</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Optimization Journey + Code -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#9650;</span> Optimization Journey: 730 &rarr; 246 ns</div>
+        <div class="journey-steps">
+          <div class="journey-step">
+            <span class="step-num">0</span>
+            <span class="step-label" style="color:var(--gray-400)">Baseline</span>
+            <div class="step-bar-track">
+              <div class="step-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--gray-400),#757575)">730</div>
+            </div>
+            <span class="step-ns">730 ns</span>
+          </div>
+          <div class="journey-step">
+            <span class="step-num">1</span>
+            <span class="step-label">Zero-Copy (std::span)</span>
+            <div class="step-bar-track">
+              <div class="step-bar-fill" style="width:71.2%">520</div>
+            </div>
+            <span class="step-ns">520 ns</span>
+          </div>
+          <div class="journey-step">
+            <span class="step-num">2</span>
+            <span class="step-label">O(1) Field Lookup</span>
+            <div class="step-bar-track">
+              <div class="step-bar-fill" style="width:52.1%">380</div>
+            </div>
+            <span class="step-ns">380 ns</span>
+          </div>
+          <div class="journey-step">
+            <span class="step-num">3</span>
+            <span class="step-label">SIMD Delimiter (AVX2)</span>
+            <div class="step-bar-track">
+              <div class="step-bar-fill" style="width:39.7%">290</div>
+            </div>
+            <span class="step-ns">290 ns</span>
+          </div>
+          <div class="journey-step">
+            <span class="step-num">4</span>
+            <span class="step-label">consteval Offsets</span>
+            <div class="step-bar-track">
+              <div class="step-bar-fill" style="width:35.6%">260</div>
+            </div>
+            <span class="step-ns">260 ns</span>
+          </div>
+          <div class="journey-step">
+            <span class="step-num">5</span>
+            <span class="step-label">Cache-Line Alignment</span>
+            <div class="step-bar-track">
+              <div class="step-bar-fill" style="width:33.7%;background:linear-gradient(90deg,var(--green),var(--green-dark))">246</div>
+            </div>
+            <span class="step-ns" style="color:var(--green)">246 ns</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">&lt;/&gt;</span> API Example</div>
+        <div class="code-block"><span class="cmt">// Zero-copy FIX message parsing</span>
+<span class="type">FixParser</span> <span class="var">parser</span>;
+<span class="kw">auto</span> <span class="var">result</span> <span class="op">=</span> <span class="var">parser</span>.<span class="fn">parse</span>(<span class="var">raw_buffer</span>);
+<span class="kw">if</span> (<span class="var">result</span>) {
+    <span class="kw">auto</span> <span class="var">id</span>  <span class="op">=</span> <span class="var">result</span><span class="op">-&gt;</span><span class="fn">get_string</span>(<span class="type">Tag</span>::<span class="var">OrderID</span>);
+    <span class="kw">auto</span> <span class="var">qty</span> <span class="op">=</span> <span class="var">result</span><span class="op">-&gt;</span><span class="fn">get_qty</span>(<span class="type">Tag</span>::<span class="var">LastQty</span>);
+    <span class="cmt">// O(1) lookup, zero heap alloc</span>
+}
+
+<span class="cmt">// Builder pattern for orders</span>
+<span class="kw">auto</span> <span class="var">msg</span> <span class="op">=</span> <span class="type">NewOrderSingle</span>::<span class="type">Builder</span>{}
+    .<span class="fn">symbol</span>(<span class="str">"AAPL"</span>)
+    .<span class="fn">side</span>(<span class="type">Side</span>::<span class="var">Buy</span>)
+    .<span class="fn">order_qty</span>(<span class="num">100</span><span class="var">_qty</span>)
+    .<span class="fn">price</span>(<span class="num">150.50</span><span class="var">_price</span>)
+    .<span class="fn">build</span>(<span class="var">asm_</span>);</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== BOTTOM GRID ===== -->
+  <div class="bottom-grid">
+
+    <!-- Architecture -->
+    <div class="card">
+      <div class="card-title"><span class="icon">&#9633;</span> Architecture</div>
+      <svg class="arch-svg" viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Network Input -->
+        <rect x="150" y="5" width="120" height="28" rx="6" fill="rgba(0,188,212,0.15)" stroke="rgba(0,188,212,0.4)" stroke-width="1"/>
+        <text x="210" y="24" text-anchor="middle" fill="#80DEEA" font-size="11" font-family="Inter,sans-serif" font-weight="600">Network Input</text>
+
+        <line x1="210" y1="33" x2="210" y2="48" stroke="rgba(0,188,212,0.4)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Parser -->
+        <rect x="120" y="48" width="180" height="32" rx="6" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.3)" stroke-width="1"/>
+        <text x="210" y="68" text-anchor="middle" fill="#EEFFFF" font-size="11" font-family="Inter,sans-serif" font-weight="600">FIX Parser</text>
+        <text x="340" y="68" text-anchor="start" fill="#546E7A" font-size="9" font-family="JetBrains Mono,monospace">SIMD + Zero-Copy</text>
+
+        <line x1="210" y1="80" x2="210" y2="95" stroke="rgba(0,188,212,0.4)" stroke-width="1.5"/>
+
+        <!-- Session -->
+        <rect x="120" y="95" width="180" height="32" rx="6" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.3)" stroke-width="1"/>
+        <text x="210" y="115" text-anchor="middle" fill="#EEFFFF" font-size="11" font-family="Inter,sans-serif" font-weight="600">Session State Machine</text>
+        <text x="340" y="115" text-anchor="start" fill="#546E7A" font-size="9" font-family="JetBrains Mono,monospace">O(1) Field Access</text>
+
+        <line x1="210" y1="127" x2="210" y2="142" stroke="rgba(0,188,212,0.4)" stroke-width="1.5"/>
+
+        <!-- Transport -->
+        <rect x="120" y="142" width="180" height="32" rx="6" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.3)" stroke-width="1"/>
+        <text x="210" y="162" text-anchor="middle" fill="#EEFFFF" font-size="11" font-family="Inter,sans-serif" font-weight="600">Transport Layer</text>
+        <text x="340" y="162" text-anchor="start" fill="#546E7A" font-size="9" font-family="JetBrains Mono,monospace">TCP / io_uring</text>
+
+        <!-- Side: Memory -->
+        <rect x="5" y="70" width="95" height="68" rx="6" fill="rgba(255,111,0,0.08)" stroke="rgba(255,111,0,0.25)" stroke-width="1"/>
+        <text x="52" y="90" text-anchor="middle" fill="#FFB74D" font-size="10" font-family="Inter,sans-serif" font-weight="600">Memory</text>
+        <text x="52" y="104" text-anchor="middle" fill="#9E9E9E" font-size="8.5" font-family="JetBrains Mono,monospace">PMR Arena</text>
+        <text x="52" y="116" text-anchor="middle" fill="#9E9E9E" font-size="8.5" font-family="JetBrains Mono,monospace">SessionHeap</text>
+        <text x="52" y="128" text-anchor="middle" fill="#9E9E9E" font-size="8.5" font-family="JetBrains Mono,monospace">SPSC Queue</text>
+
+        <line x1="100" y1="104" x2="120" y2="104" stroke="rgba(255,111,0,0.3)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Msgs supported -->
+        <text x="210" y="193" text-anchor="middle" fill="#546E7A" font-size="9" font-family="Inter,sans-serif">17 FIX message types &middot; FIX 4.4 / 5.0 / FIXT 1.1</text>
+
+        <defs>
+          <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="rgba(0,188,212,0.4)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Use Cases -->
+    <div class="card">
+      <div class="card-title"><span class="icon">&#9733;</span> Use Cases</div>
+      <ul class="use-case-list">
+        <li>
+          <span class="uc-icon">&#9889;</span>
+          <span><strong>High-Frequency Trading</strong><br><span style="font-size:11px;color:var(--gray-400)">Sub-microsecond order execution</span></span>
+        </li>
+        <li>
+          <span class="uc-icon">&#9878;</span>
+          <span><strong>Low-Latency Strategy Engines</strong><br><span style="font-size:11px;color:var(--gray-400)">Deterministic, jitter-free execution</span></span>
+        </li>
+        <li>
+          <span class="uc-icon">&#9650;</span>
+          <span><strong>Market Data Pipelines</strong><br><span style="font-size:11px;color:var(--gray-400)">FIX-based feed processing at 4M+ msg/sec</span></span>
+        </li>
+        <li>
+          <span class="uc-icon">&#9881;</span>
+          <span><strong>FIX Protocol Education</strong><br><span style="font-size:11px;color:var(--gray-400)">Modern C++23 reference implementation</span></span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Resources -->
+    <div class="card">
+      <div class="card-title"><span class="icon">&#8599;</span> Resources &amp; Links</div>
+      <div class="links-section">
+        <div class="link-item">
+          <span class="link-icon">&#9741;</span>
+          <div>
+            <div class="link-text">GitHub Repository</div>
+            <div class="link-url">github.com/SilverstreamsAI/NexusFix</div>
+          </div>
+        </div>
+        <div class="link-item">
+          <span class="link-icon">&#9736;</span>
+          <div>
+            <div class="link-text">Benchmark Comparison</div>
+            <div class="link-url">github.com/.../docs/compare</div>
+          </div>
+        </div>
+        <div class="link-item">
+          <span class="link-icon">&#9998;</span>
+          <div>
+            <div class="link-text">Optimization Diary</div>
+            <div class="link-url">730ns to 246ns &mdash; 5-phase journey</div>
+          </div>
+        </div>
+        <div class="link-item">
+          <span class="link-icon">&#9873;</span>
+          <div>
+            <div class="link-text">License: MIT</div>
+            <div class="link-url">Free for commercial &amp; research use</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer">
+    <div>
+      <strong style="color:var(--cyan-light)">NexusFIX</strong> &mdash; Built with Modern C++23 &middot; GCC 13+ / Clang 17+ &middot; CMake 3.20+ &middot; Linux / macOS / Windows
+    </div>
+    <div class="footer-tags">
+      <span class="footer-tag">#HFT</span>
+      <span class="footer-tag">#FIX</span>
+      <span class="footer-tag">#C++23</span>
+      <span class="footer-tag">#ZeroAlloc</span>
+      <span class="footer-tag">#SIMD</span>
+      <span class="footer-tag">#LowLatency</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+</body>
+</html>

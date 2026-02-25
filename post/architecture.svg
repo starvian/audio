@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="400" viewBox="0 0 420 200">
+  <!-- Dark background -->
+  <rect x="0" y="0" width="420" height="200" fill="#0A1628"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6" fill="rgba(0,188,212,0.4)"/>
+    </marker>
+  </defs>
+
+  <!-- Network Input -->
+  <rect x="150" y="5" width="120" height="28" rx="6" fill="rgba(0,188,212,0.15)" stroke="rgba(0,188,212,0.4)" stroke-width="1"/>
+  <text x="210" y="24" text-anchor="middle" fill="#80DEEA" font-size="11" font-family="Inter,sans-serif" font-weight="600">Network Input</text>
+
+  <line x1="210" y1="33" x2="210" y2="48" stroke="rgba(0,188,212,0.4)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Parser -->
+  <rect x="120" y="48" width="180" height="32" rx="6" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.3)" stroke-width="1"/>
+  <text x="210" y="68" text-anchor="middle" fill="#EEFFFF" font-size="11" font-family="Inter,sans-serif" font-weight="600">FIX Parser</text>
+  <text x="340" y="68" text-anchor="start" fill="#546E7A" font-size="9" font-family="JetBrains Mono,monospace">SIMD + Zero-Copy</text>
+
+  <line x1="210" y1="80" x2="210" y2="95" stroke="rgba(0,188,212,0.4)" stroke-width="1.5"/>
+
+  <!-- Session -->
+  <rect x="120" y="95" width="180" height="32" rx="6" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.3)" stroke-width="1"/>
+  <text x="210" y="115" text-anchor="middle" fill="#EEFFFF" font-size="11" font-family="Inter,sans-serif" font-weight="600">Session State Machine</text>
+  <text x="340" y="115" text-anchor="start" fill="#546E7A" font-size="9" font-family="JetBrains Mono,monospace">O(1) Field Access</text>
+
+  <line x1="210" y1="127" x2="210" y2="142" stroke="rgba(0,188,212,0.4)" stroke-width="1.5"/>
+
+  <!-- Transport -->
+  <rect x="120" y="142" width="180" height="32" rx="6" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.3)" stroke-width="1"/>
+  <text x="210" y="162" text-anchor="middle" fill="#EEFFFF" font-size="11" font-family="Inter,sans-serif" font-weight="600">Transport Layer</text>
+  <text x="340" y="162" text-anchor="start" fill="#546E7A" font-size="9" font-family="JetBrains Mono,monospace">TCP / io_uring</text>
+
+  <!-- Side: Memory -->
+  <rect x="5" y="70" width="95" height="68" rx="6" fill="rgba(255,111,0,0.08)" stroke="rgba(255,111,0,0.25)" stroke-width="1"/>
+  <text x="52" y="90" text-anchor="middle" fill="#FFB74D" font-size="10" font-family="Inter,sans-serif" font-weight="600">Memory</text>
+  <text x="52" y="104" text-anchor="middle" fill="#9E9E9E" font-size="8.5" font-family="JetBrains Mono,monospace">PMR Arena</text>
+  <text x="52" y="116" text-anchor="middle" fill="#9E9E9E" font-size="8.5" font-family="JetBrains Mono,monospace">SessionHeap</text>
+  <text x="52" y="128" text-anchor="middle" fill="#9E9E9E" font-size="8.5" font-family="JetBrains Mono,monospace">SPSC Queue</text>
+
+  <line x1="100" y1="104" x2="120" y2="104" stroke="rgba(255,111,0,0.3)" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Msgs supported -->
+  <text x="210" y="193" text-anchor="middle" fill="#546E7A" font-size="9" font-family="Inter,sans-serif">17 FIX message types &#183; FIX 4.4 / 5.0 / FIXT 1.1</text>
+</svg>

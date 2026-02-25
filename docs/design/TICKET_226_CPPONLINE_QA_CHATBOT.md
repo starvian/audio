@@ -51,6 +51,7 @@ Run locally on presenter's laptop during the live session. Captures attendee voi
 | TTS Generation | edge-tts (Microsoft Azure, free) | High quality Neural voices, Python CLI, SSML support |
 | Audio Routing | PulseAudio dual-sink isolation (Linux) | Separates STT input from TTS output, prevents feedback loop |
 | Data | Embedded JSON (from TICKET_205) | Single file, no API calls |
+| LLM Fallback | Claude API (Anthropic) | Handles out-of-scope questions when keyword search score < threshold |
 | Hosting | GitHub Pages (booth) + localhost (presenter) | Dual deployment |
 | Deployment | `/docs/chatbot/` or separate `gh-pages` branch | Minimal repo impact |
 
@@ -58,8 +59,9 @@ Run locally on presenter's laptop during the live session. Captures attendee voi
 
 ```
 Attendee -> Gather Town iframe -> GitHub Pages (static) -> Client-side JS
-                                                           |-- Q&A JSON embedded
-                                                           |-- Keyword search
+                                                           |-- Q&A JSON embedded (182 pairs)
+                                                           |-- Keyword search (score >= 10 -> pre-written answer)
+                                                           |-- LLM fallback (score < 10 -> Claude API, optional)
                                                            |-- Category filter
                                                            +-- Browser SpeechSynthesis (read answer aloud)
 ```
@@ -395,6 +397,114 @@ function calculateScore(terms, item) {
     return score;
 }
 ```
+
+### LLM Fallback (Out-of-Scope Questions)
+
+When keyword search fails to find a good match, an LLM provides a fallback answer instead of a dead end.
+
+#### Decision Flow
+
+```
+User question
+    |
+    v
+Keyword search 182 Q&A --> top result score
+    |
+    v
+score >= THRESHOLD (10)?
+    |           |
+   YES          NO
+    |           |
+    v           v
+Return        LLM API call
+pre-written   (Claude API)
+answer        |
+(0ms, free)   v
+              Generated answer
+              (~1-2s, paid)
+              |
+              v
+              Display with "AI-generated" badge
+              (visually distinct from pre-written answers)
+```
+
+#### Why Score Threshold = 10
+
+The keyword search scoring is: keyword match (+10), question text (+5), answer text (+2). A score of 10 means at least one exact keyword hit or two question-text matches. Below 10, the match quality is too low to be useful.
+
+The threshold is tunable. Calibrate during dry run testing by reviewing false positives (score >= 10 but wrong answer) and false negatives (score < 10 but correct answer exists).
+
+#### Design Principles
+
+| Principle | Implementation |
+|-----------|---------------|
+| **Pre-written first** | LLM is NEVER called when keyword search has a good match (score >= threshold) |
+| **90%+ free** | 182 curated Q&A cover the expected question space; LLM handles the long tail |
+| **Visually distinct** | LLM-generated answers shown with "AI-generated" badge, different styling |
+| **Scoped** | LLM system prompt restricts answers to NexusFIX project topics only |
+| **Graceful degradation** | If LLM API fails (network, rate limit, key expired), show "Question not in our Q&A database. Try browsing categories or contact contact@silverstream.tech" |
+
+#### LLM Integration (llm.js)
+
+```javascript
+class LLMFallback {
+    constructor(apiKey, model = 'claude-sonnet-4-5-20250929') {
+        this.apiKey = apiKey;
+        this.model = model;
+        this.systemPrompt = `You are a Q&A assistant for NexusFIX, a modern C++23 FIX protocol engine.
+Answer questions about NexusFIX architecture, performance, C++ techniques, and FIX protocol.
+Keep answers concise (2-4 sentences). If the question is unrelated to NexusFIX or C++, politely decline.`;
+    }
+
+    async ask(question) {
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': this.apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: this.model,
+                    max_tokens: 300,
+                    system: this.systemPrompt,
+                    messages: [{ role: 'user', content: question }]
+                })
+            });
+
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const data = await response.json();
+            return {
+                answer: data.content[0].text,
+                source: 'llm',
+                model: this.model
+            };
+        } catch (error) {
+            console.error('LLM fallback failed:', error);
+            return null; // Graceful degradation: show "not found" message
+        }
+    }
+}
+```
+
+#### API Key Management
+
+| Mode | API Key Source | Security |
+|------|--------------|----------|
+| **Booth (GitHub Pages)** | User enters key in settings panel, stored in `localStorage` | Key never committed to repo; user-provided per session |
+| **Presenter (localhost)** | Same `localStorage` approach or hardcoded in local-only config | Local machine only, not deployed |
+
+**Note**: The booth mode LLM fallback is optional. If no API key is configured, the system gracefully falls back to "Question not in our Q&A database" with category suggestions. The 182 pre-written Q&A work without any API key.
+
+#### Latency Impact
+
+| Path | Latency | Cost |
+|------|---------|------|
+| Keyword match (score >= threshold) | < 5ms | Free |
+| LLM fallback (score < threshold) | ~1-2s | ~$0.001-0.003 per query |
+| LLM fallback failure | < 5ms (immediate fallback message) | Free |
 
 ---
 
@@ -820,6 +930,7 @@ docs/chatbot/
 ├── presenter.html      # Presenter assistant mode (voice + TTS, local only)
 ├── style.css           # Shared dark theme styles
 ├── app.js              # Search logic, UI interaction, category filters
+├── llm.js              # LLM fallback for out-of-scope questions (Claude API)
 ├── voice.js            # Web Speech API integration (presenter mode only)
 ├── tts.js              # TTS playback + audio sink routing (new)
 ├── qa-data.js          # All 182 Q&A pairs as JSON (includes a_short + audio paths)
@@ -844,12 +955,13 @@ Single directory, no build step, no dependencies, no node_modules.
 
 ## Implementation Tasks
 
-### Phase 1: Data Extraction
-- [ ] Parse TICKET_205 Q&A section into structured JSON
-- [ ] Assign categories to each Q&A pair
-- [ ] Add keyword arrays for search optimization
-- [ ] Write `a_short` (1-2 sentence summary) for each of the 182 answers
-- [ ] Validate: 182 questions, no missing answers, no missing `a_short`
+### Phase 1: Data Extraction (COMPLETED 2026-02-25)
+- [x] Parse TICKET_205 Q&A section into structured JSON
+- [x] Assign categories to each Q&A pair (17 categories)
+- [x] Add keyword arrays for search optimization (182 keyword arrays)
+- [x] Write `a_short` (1-2 sentence summary) for each of the 182 answers
+- [x] Validate: 182 questions, no missing answers, no missing `a_short`
+- Output: `docs/chatbot/qa-data.js` (182 Q&A, 17 categories, all fields populated)
 
 ### Phase 2: Core UI (Booth Mode)
 - [ ] Create `index.html` with chat-style layout
@@ -864,6 +976,17 @@ Single directory, no build step, no dependencies, no node_modules.
 - [ ] Search-as-you-type with debounce
 - [ ] Result ranking and highlighting
 - [ ] "No results" fallback with suggested categories
+
+### Phase 3.5: LLM Fallback (Out-of-Scope Questions)
+- [ ] Implement `llm.js` with LLMFallback class (Claude API integration)
+- [ ] Add score threshold logic in `app.js` (score < 10 triggers LLM)
+- [ ] Add API key settings panel (localStorage, optional)
+- [ ] Add "AI-generated" badge styling for LLM answers (visually distinct)
+- [ ] Add system prompt scoped to NexusFIX topics only
+- [ ] Graceful degradation: API failure shows "not in Q&A database" + category suggestions
+- [ ] **Test**: Out-of-scope question triggers LLM, not empty results
+- [ ] **Test**: In-scope question returns pre-written answer, NOT LLM
+- [ ] **Test**: No API key configured gracefully falls back to category suggestions
 
 ### Phase 4: Voice Recognition (Presenter Mode)
 - [ ] Create `presenter.html` with split layout (transcript + Q&A results)
@@ -1240,7 +1363,7 @@ Attendee speaks
 | Works in Gather Town iframe (booth mode) | Verified |
 | Voice recognition works with dual-sink routing | Verified |
 | TTS playback audible to attendee via Gather Town | Verified |
-| No external dependencies at runtime | 0 API calls (except Speech API) |
+| No external dependencies for core Q&A | 0 API calls for 182 pre-written answers (except Speech API); LLM API only for out-of-scope fallback |
 | Page load time | < 2 seconds |
 | Accessible without presenter present | 24/7 during conference (booth mode) |
 | End-to-end dry run completed (voice + TTS) | Before conference day |

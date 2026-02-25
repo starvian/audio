@@ -59,6 +59,7 @@ Deploy a self-service Q&A chatbot for the C++Online 2026 poster session. Two dep
 | TTS (Presenter) | Pre-generated edge-tts .mp3 files |
 | Audio Routing | PulseAudio dual-sink isolation (Linux) |
 | Data | Embedded JSON from TICKET_205 (182 Q&A pairs) |
+| LLM Fallback | Claude API (out-of-scope questions, optional) |
 | Hosting | GitHub Pages (booth) + localhost (presenter) |
 
 ### Data Source
@@ -169,7 +170,7 @@ EOF
 
 - Mirrors NexusFIX design philosophy: deterministic, zero-dependency
 - All 182 Q&A pairs are pre-written (from TICKET_205), not AI-generated at runtime
-- Search is client-side keyword matching, not AI/LLM
+- Search is client-side keyword matching; LLM is fallback only for out-of-scope questions (score < threshold)
 
 ## Audio Isolation (Presenter Mode)
 
@@ -187,6 +188,7 @@ docs/chatbot/
 ├── presenter.html      # Presenter assistant mode (local only)
 ├── style.css           # Shared dark theme styles
 ├── app.js              # Search logic, UI interaction, category filters
+├── llm.js              # LLM fallback for out-of-scope questions (Claude API)
 ├── voice.js            # Web Speech API integration (presenter mode)
 ├── tts.js              # TTS playback + audio sink routing + feedback prevention
 ├── qa-data.js          # All 182 Q&A pairs as JSON (includes a_short + audio paths)
@@ -220,6 +222,13 @@ docs/chatbot/
 - Client-side keyword search with scoring (keyword match: 10, question: 5, answer: 2)
 - Search-as-you-type with debounce
 - Result ranking and highlighting
+
+## Phase 3.5: LLM Fallback (Out-of-Scope Questions)
+- `llm.js` with Claude API integration
+- Score threshold: search score < 10 triggers LLM fallback
+- API key via localStorage (user-provided, optional)
+- "AI-generated" badge for LLM answers (visually distinct)
+- Graceful degradation: API failure shows category suggestions + contact info
 
 ## Phase 4: Voice Recognition (Presenter Mode)
 - `presenter.html` with split layout (transcript + Q&A results)

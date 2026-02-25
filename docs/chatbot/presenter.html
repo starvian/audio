@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusFix Presenter Assistant - C++Online 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:,">
+</head>
+<body class="presenter-mode">
+    <div class="presenter-container">
+        <!-- Left Panel: Transcript -->
+        <div class="transcript-panel">
+            <div class="transcript-header">
+                <div class="header-title">
+                    NexusFix Presenter Assistant <span>C++Online 2026</span>
+                </div>
+                <div class="voice-controls">
+                    <button id="listen-btn" class="voice-btn voice-btn-listen">Listen</button>
+                    <button id="stop-btn" class="voice-btn voice-btn-stop" disabled>Stop</button>
+                    <button id="clear-btn" class="voice-btn voice-btn-clear">Clear</button>
+                    <span id="voice-status" class="voice-status">Ready</span>
+                </div>
+            </div>
+            <div class="transcript-body" id="transcript-body">
+                <div class="transcript-placeholder">Click <strong>Listen</strong> to start voice recognition.</div>
+            </div>
+            <div class="transcript-footer">
+                <div class="search-bar presenter-search-bar">
+                    <input type="text" id="search-input" class="search-input"
+                           placeholder="Type keyword or question..." autocomplete="off">
+                    <button id="search-btn" class="search-btn">Ask</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Q&A Results -->
+        <div class="results-panel">
+            <div class="results-panel-header">
+                <span class="results-panel-title">Q&A Results</span>
+                <label class="auto-play-toggle">
+                    <input type="checkbox" id="auto-play-toggle"> Auto-play
+                </label>
+            </div>
+            <div class="results-area" id="results-area"></div>
+            <div class="playback-status" id="playback-status"></div>
+        </div>
+    </div>
+
+    <script src="qa-data.js"></script>
+    <script src="llm.js"></script>
+    <script src="app.js"></script>
+    <script src="voice.js"></script>
+    <script src="tts.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var listenBtn = document.getElementById('listen-btn');
+        var stopBtn = document.getElementById('stop-btn');
+        var clearBtn = document.getElementById('clear-btn');
+        var statusEl = document.getElementById('voice-status');
+        var transcriptBody = document.getElementById('transcript-body');
+        var autoPlayToggle = document.getElementById('auto-play-toggle');
+
+        var isListening = false;
+
+        function addTranscriptLine(text, isFinal) {
+            // Remove placeholder if present
+            var placeholder = transcriptBody.querySelector('.transcript-placeholder');
+            if (placeholder) placeholder.remove();
+
+            // Remove previous interim line
+            var interim = transcriptBody.querySelector('.transcript-interim');
+            if (interim) interim.remove();
+
+            var div = document.createElement('div');
+            div.className = isFinal ? 'transcript-final' : 'transcript-interim';
+            div.textContent = text;
+            transcriptBody.appendChild(div);
+            transcriptBody.scrollTop = transcriptBody.scrollHeight;
+        }
+
+        function onInterim(text) {
+            addTranscriptLine(text, false);
+        }
+
+        function onFinal(text) {
+            addTranscriptLine(text, true);
+
+            // Auto-search on final transcript
+            var input = document.getElementById('search-input');
+            if (input) input.value = text;
+
+            // Use AudioPipeline if available, else direct search
+            if (window.audioPipeline) {
+                window.audioPipeline.onSpeechResult(text);
+            } else {
+                var results = window.searchQA(text);
+                window.renderResults(results, text);
+            }
+        }
+
+        // Listen button
+        listenBtn.addEventListener('click', function () {
+            if (!window.voiceRecognizer) {
+                statusEl.textContent = 'Voice not supported';
+                statusEl.className = 'voice-status voice-status-error';
+                return;
+            }
+            window.voiceRecognizer.onInterim = onInterim;
+            window.voiceRecognizer.onFinal = onFinal;
+            window.voiceRecognizer.start();
+            isListening = true;
+            listenBtn.disabled = true;
+            stopBtn.disabled = false;
+            statusEl.textContent = 'Listening...';
+            statusEl.className = 'voice-status voice-status-active';
+        });
+
+        // Stop button
+        stopBtn.addEventListener('click', function () {
+            if (window.voiceRecognizer) {
+                window.voiceRecognizer.stop();
+            }
+            isListening = false;
+            listenBtn.disabled = false;
+            stopBtn.disabled = true;
+            statusEl.textContent = 'Stopped';
+            statusEl.className = 'voice-status';
+        });
+
+        // Clear button
+        clearBtn.addEventListener('click', function () {
+            transcriptBody.innerHTML = '<div class="transcript-placeholder">Click <strong>Listen</strong> to start voice recognition.</div>';
+            var input = document.getElementById('search-input');
+            if (input) input.value = '';
+            var area = document.getElementById('results-area');
+            if (area) area.innerHTML = '';
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Ignore shortcuts when typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isListening) {
+                    stopBtn.click();
+                } else {
+                    listenBtn.click();
+                }
+            } else if (e.key === 'Escape') {
+                if (window.audioPipeline) {
+                    window.audioPipeline.stop();
+                }
+            }
+        });
+
+        // Auto-play toggle state
+        autoPlayToggle.addEventListener('change', function () {
+            if (window.audioPipeline) {
+                window.audioPipeline.autoPlay = autoPlayToggle.checked;
+            }
+        });
+    })();
+    </script>
+</body>
+</html>
