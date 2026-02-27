@@ -1,0 +1,44 @@
+SLIDE 1 - Title (10s)
+Welcome to NexusFIX, a zero-cost FIX engine for modern C++. Sub-microsecond parsing using only standard library features.
+
+SLIDE 2 - General Project (15s)
+QuickFIX uses C++ ninety-eight idioms incompatible with sub-microsecond latency. NexusFIX starts from first principles with C++ twenty-three, collapsing the P99 to P50 ratio from thirty X to one point three X.
+
+SLIDE 3 - v1.0.0 Architecture (15s)
+Standard expected provides zero-cost error handling with no exceptions on the hot path. NexusFIX is a library, not a framework, using static dispatch instead of virtual calls.
+
+SLIDE 4 - v0.1.0 Parser Foundation (15s)
+A header-only, zero-copy parser using standard span and string view with no allocations. The entire parsed message fits under one kilobyte on the stack.
+
+SLIDE 5 - v0.1.1 PMR Pools (15s)
+Monotonic PMR allocator uses pure pointer arithmetic for O one allocation. This eliminated unpredictable heap allocations and collapsed tail latency variance.
+
+SLIDE 6 - CMake and CI/CD (12s)
+CMake FetchContent with no external package manager. GitHub Actions matrix tests across GCC, Clang, and MSVC with benchmark regression gates.
+
+SLIDE 7 - Object Construction (12s)
+Standard construct at replaces placement new with constexpr compatibility. PMR handles allocation, construct at handles initialization, zero runtime impact.
+
+SLIDE 8 - MPSC Queue (12s)
+Lock-free queue achieves thirty nanosecond enqueue, two to three X faster than general-purpose queues. Uses the LMAX Disruptor pattern with release-acquire ordering.
+
+SLIDE 9 - SBE Encoding (12s)
+S.B.E. for internal IPC: parse FIX once, decode N times downstream. Fifty-nine percent size reduction with fifteen nanosecond encode latency.
+
+SLIDE 10 - Utilities (12s)
+FNV one a hash enables O one dispatch via jump table with zero collisions verified at compile time. All utilities inline completely at O2.
+
+SLIDE 11 - MsgType Dispatch (12s)
+Constexpr lookup table achieves two nanosecond dispatch versus twenty-five nanoseconds for unordered map. The 256-entry table fits in L1 cache.
+
+SLIDE 12 - Compile-time and C++23 (15s)
+Twenty-three compile-time optimizations save seventy nanoseconds per parse. New features include the assume attribute, standard unreachable, and if consteval.
+
+SLIDE 13 - Ranges and Modern Idioms (12s)
+Ranges provide clean pipelines but show ten to fifteen percent regression on hot paths, so they are used off the critical path only. Deducing this eliminated three CRTP base classes.
+
+SLIDE 14 - Structural Index and mimalloc (15s)
+Two-stage simdjson-style parsing with S.I.M.D. index building and O one field access, delivering four point four X improvement. mimalloc achieves seven nanosecond allocation versus twenty-five for glibc.
+
+SLIDE 15 - xsimd SIMD and Closing (15s)
+Portable S.I.M.D. via xsimd across SSE, AVX2, and NEON with only three percent overhead versus hand-written intrinsics. Visit our booth to try the interactive chatbot. Thank you for watching!

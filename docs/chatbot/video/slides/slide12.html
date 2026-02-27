@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Slide 12 - Compile-time and C++23</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1920px; height: 1080px;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0A1628 0%, #0F2237 50%, #0A1628 100%);
+    color: #FFFFFF; overflow: hidden; position: relative;
+  }
+  body::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px; pointer-events: none;
+  }
+  .slide {
+    position: relative; z-index: 1;
+    width: 1920px; height: 1080px;
+    display: flex; flex-direction: column;
+  }
+  .title-bar {
+    background: rgba(0,188,212,0.08);
+    border-bottom: 2px solid rgba(0,188,212,0.2);
+    padding: 48px 80px;
+    display: flex; align-items: center; gap: 32px;
+  }
+  .title-bar .icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, #C792EA, #1565C0);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .title-bar h1 {
+    font-size: 48px; font-weight: 800;
+    background: linear-gradient(90deg, #FFFFFF 0%, #80DEEA 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .title-bar .version {
+    font-size: 24px; color: #00BCD4;
+    font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  }
+  .content {
+    flex: 1; padding: 64px 120px;
+    display: flex; flex-direction: column; justify-content: center; gap: 40px;
+  }
+  .bullet {
+    display: flex; align-items: flex-start; gap: 28px;
+    font-size: 32px; line-height: 1.5; color: rgba(255,255,255,0.9);
+  }
+  .bullet .dot {
+    width: 18px; height: 18px; min-width: 18px;
+    background: #C792EA; border-radius: 50%; margin-top: 14px;
+  }
+  .bullet strong { color: #80DEEA; }
+  .tag-row {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding-left: 46px;
+  }
+  .tag {
+    background: rgba(199,146,234,0.12);
+    border: 1px solid rgba(199,146,234,0.25);
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 22px;
+    color: #C792EA;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+  .slide-num {
+    position: absolute; bottom: 32px; right: 48px;
+    font-size: 16px; color: rgba(255,255,255,0.2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .branding {
+    position: absolute; bottom: 32px; left: 48px;
+    font-size: 16px; color: rgba(255,255,255,0.15); font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="title-bar">
+    <div class="icon">C++</div>
+    <div>
+      <h1>Compile-Time &amp; C++23</h1>
+      <div class="version">v0.1.10 + v0.1.11</div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="bullet">
+      <div class="dot"></div>
+      <div><strong>23 compile-time optimizations</strong>: field offsets, tag validation, dispatch tables</div>
+    </div>
+    <div class="bullet">
+      <div class="dot"></div>
+      <div><strong>~70ns saved per parse</strong> by moving work from runtime to compile time</div>
+    </div>
+    <div class="bullet">
+      <div class="dot"></div>
+      <div><strong>Debug safety preserved</strong>: [[assume]] replaced with assert() in debug builds</div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">[[assume]]</span>
+      <span class="tag">std::unreachable()</span>
+      <span class="tag">if consteval</span>
+      <span class="tag">std::to_underlying()</span>
+      <span class="tag">consteval</span>
+      <span class="tag">concepts</span>
+    </div>
+  </div>
+  <div class="branding">NexusFIX - C++Online 2026</div>
+  <div class="slide-num">12 / 15</div>
+</div>
+</body>
+</html>

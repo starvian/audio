@@ -1,6 +1,3 @@
-# Pre-generated TTS audio files (local only, ~150MB)
-docs/chatbot/audio/
-
 # Python
 __pycache__/
 *.pyc

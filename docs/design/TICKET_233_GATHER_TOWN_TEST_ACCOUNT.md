@@ -1,6 +1,6 @@
 # TICKET_233: Create Gather Town Test Environment
 
-## Status: Open
+## Status: Partial (Booth Mode verified, Presenter Mode deferred)
 ## Priority: High (Blocks end-to-end verification)
 ## Category: Conference / Testing Infrastructure
 ## Parent: TICKET_226
@@ -39,7 +39,8 @@ Gather Town has no separate signup page. Login and registration use the same ent
 4. Option B: Enter email -> click "Sign in with email" -> check inbox for 6-digit code -> enter code
 5. First login automatically creates the account
 6. Choose avatar appearance and display name in the character picker
-7. Free plan: 30-day full trial (up to 50 users), then free for up to 25 users
+7. ~~Free plan: 30-day full trial (up to 50 users), then free for up to 25 users~~
+   **UPDATE 2026-02-26**: Free plan now limits spaces to **1 concurrent user**. Two users cannot be in the same space simultaneously without a paid plan.
 
 ## Step 2: Create Test Space
 
@@ -67,44 +68,60 @@ To test presenter mode (proximity voice chat), a second participant is needed:
 3. Join the same test space with this second account
 4. This account simulates an attendee asking questions via voice
 
-## Step 5: Verify Booth Mode (Mode A)
+## Step 5: Verify Booth Mode (Mode A) - PASSED 2026-02-26
+
+Chatbot URL: `https://silverstreamsai.github.io/NexusFix/chatbot/`
+Space URL: `https://app.gather.town/app/Svun9QEVnAur99YI/NexusFix%20QA%20Test`
 
 | # | Test | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 1 | Walk to Website object | iframe opens with chatbot UI | [ ] |
-| 2 | Type a question (e.g. "PMR") | Search results appear with relevant Q&A | [ ] |
-| 3 | Click a category filter | Results filtered correctly | [ ] |
-| 4 | Click "Expand" on an answer | Full answer displayed | [ ] |
-| 5 | iframe renders correctly | No layout overflow, scrollable, dark theme visible | [ ] |
-| 6 | No console errors | Check DevTools console | [ ] |
+| 1 | Walk to Website object | iframe opens with chatbot UI | [x] |
+| 2 | Type a question (e.g. "PMR") | Search results appear with relevant Q&A (5 results) | [x] |
+| 3 | Click a category filter | Results filtered correctly | [x] |
+| 4 | Click "Expand" on an answer | Full answer displayed | [x] |
+| 5 | iframe renders correctly | No layout overflow, scrollable, dark theme visible | [x] |
+| 6 | No console errors | Check DevTools console | [x] |
 
-## Step 6: Verify Presenter Mode (Mode B) - Requires TICKET_231 + TICKET_232
+## Step 6: Verify Presenter Mode (Mode B) - SKIPPED (Gather Town free plan limitation)
+
+**Reason**: Gather Town free plan (as of 2026-02-26) limits spaces to 1 concurrent user.
+Two accounts cannot be in the same space simultaneously, making proximity voice chat
+testing impossible without a paid plan.
+
+**Alternative**: Presenter mode will be verified locally without Gather Town:
+- STT (Web Speech API) tested with local microphone input
+- TTS playback tested with local audio output
+- PulseAudio sink routing tested with `setup_audio.sh verify`
+- Full pipeline tested locally: speak -> STT -> Q&A match -> TTS playback
+- Gather Town integration deferred to conference day (paid space provided by C++Online)
 
 | # | Test | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 1 | Attendee account speaks near presenter | Proximity chat audio reaches presenter | [ ] |
-| 2 | PulseAudio GatherIn sink receives audio | `setup_audio.sh verify` confirms | [ ] |
-| 3 | presenter.html transcript shows speech | Web Speech API captures from GatherIn monitor | [ ] |
-| 4 | Q&A auto-match appears | Search results shown for recognized text | [ ] |
-| 5 | Click [Play Short] | .mp3 plays through TTSOut sink | [ ] |
-| 6 | Attendee hears TTS response | TTSOut routed to Gather Town mic input | [ ] |
-| 7 | TTS does NOT re-trigger STT | Audio isolation verified (no echo in transcript) | [ ] |
+| 1 | Attendee account speaks near presenter | Proximity chat audio reaches presenter | [SKIPPED] |
+| 2 | PulseAudio GatherIn sink receives audio | `setup_audio.sh verify` confirms | [LOCAL] |
+| 3 | presenter.html transcript shows speech | Web Speech API captures from GatherIn monitor | [LOCAL] |
+| 4 | Q&A auto-match appears | Search results shown for recognized text | [LOCAL] |
+| 5 | Click [Play Short] | .mp3 plays through TTSOut sink | [LOCAL] |
+| 6 | Attendee hears TTS response | TTSOut routed to Gather Town mic input | [SKIPPED] |
+| 7 | TTS does NOT re-trigger STT | Audio isolation verified (no echo in transcript) | [LOCAL] |
 
 ---
 
 ## Gather Town Free Plan Limits
 
-| Feature | Free Plan |
-|---------|-----------|
-| First 30 days | All features, up to 50 users |
-| After 30 days | Free for up to 25 users |
+**WARNING: Information below was outdated. Updated 2026-02-26.**
+
+| Feature | Free Plan (actual, 2026-02-26) |
+|---------|-------------------------------|
+| Concurrent users per space | **1** (cannot have 2 users simultaneously) |
 | Custom maps | Yes |
 | Website objects (iframe) | Yes |
-| Proximity voice chat | Yes |
+| Proximity voice chat | N/A (requires 2+ users) |
 | Credit card required | No |
 | Cost | $0 |
 
-Free plan is sufficient for all testing needs.
+Free plan is sufficient for **single-user booth mode testing only**.
+Multi-user testing (presenter mode with proximity chat) requires a paid plan.
 
 ---
 
@@ -119,11 +136,12 @@ Free plan is sufficient for all testing needs.
 
 ## Acceptance Criteria
 
-- [ ] Primary account created and can access Gather Town
-- [ ] Test space created with Website object configured
-- [ ] Second account created (or second browser profile ready)
-- [ ] Booth mode (Mode A) iframe embedding verified (Step 5 checklist)
-- [ ] Presenter mode (Mode B) end-to-end verified (Step 6 checklist)
+- [x] Primary account created and can access Gather Town
+- [x] Test space created with Website object configured
+- [x] Second account created (or second browser profile ready)
+- [x] Booth mode (Mode A) iframe embedding verified (Step 5 checklist)
+- [SKIPPED] Presenter mode (Mode B) end-to-end verified (Step 6 checklist) - Free plan 1-user limit
+- [x] Alternative: Presenter mode to be verified locally (see Step 6 notes)
 
 ---
 

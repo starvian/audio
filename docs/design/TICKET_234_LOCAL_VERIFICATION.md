@@ -1,6 +1,6 @@
 # TICKET_234: Local Verification of Booth Mode (index.html)
 
-## Status: Open
+## Status: Done
 ## Priority: High (Blocks TICKET_230 deploy)
 ## Category: Conference / Testing
 ## Parent: TICKET_226
@@ -36,36 +36,36 @@ Open in Chrome: `http://localhost:8080/index.html`
 
 | # | Test | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 1 | Page loads without errors | Dark theme UI, search bar, category buttons visible | [ ] |
-| 2 | Check DevTools console | No JavaScript errors | [ ] |
-| 3 | Type "PMR" in search box | Results with PMR-related Q&A appear | [ ] |
-| 4 | Type "SIMD" in search box | Results with SIMD-related Q&A appear | [ ] |
-| 5 | Click a category filter button | Results filtered to that category only | [ ] |
-| 6 | Click expand on an answer | Full answer text displayed | [ ] |
-| 7 | Search-as-you-type debounce | Results update as user types, no lag | [ ] |
-| 8 | Result highlighting | Search keywords highlighted in results | [ ] |
-| 9 | Code blocks in answers | Syntax highlighting renders correctly | [ ] |
-| 10 | All 182 Q&A accessible | Browse each category, verify counts match qa-data.js | [ ] |
+| 1 | Page loads without errors | Dark theme UI, search bar, category buttons visible | [x] |
+| 2 | Check DevTools console | No JavaScript errors | [x] |
+| 3 | Type "PMR" in search box | Results with PMR-related Q&A appear | [x] |
+| 4 | Type "SIMD" in search box | Results with SIMD-related Q&A appear | [x] |
+| 5 | Click a category filter button | Results filtered to that category only | [x] |
+| 6 | Click expand on an answer | Full answer text displayed | [x] |
+| 7 | Search-as-you-type debounce | Results update as user types, no lag | [x] |
+| 8 | Result highlighting | Search keywords highlighted in results | [x] |
+| 9 | Code blocks in answers | Syntax highlighting renders correctly | [x] |
+| 10 | All 182 Q&A accessible | Browse each category, verify counts match qa-data.js | [x] |
 
 ## Step 3: Verify LLM Fallback (Optional)
 
 | # | Test | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 1 | No API key set | Status shows "No API key configured" | [ ] |
-| 2 | Search with low score (e.g. "weather") | Graceful fallback: category suggestions + contact info | [ ] |
-| 3 | Set API key via settings gear icon | Key saved to localStorage, status updates | [ ] |
-| 4 | Search out-of-scope question with API key | LLM answer with "AI-generated" badge | [ ] |
-| 5 | Clear API key | Key removed, status resets | [ ] |
+| 1 | No API key set | Status shows "No API key configured" | [x] |
+| 2 | Search with low score (e.g. "weather") | Graceful fallback: category suggestions + contact info | [x] |
+| 3 | Set API key via settings gear icon | Key saved to localStorage, status updates | [x] |
+| 4 | Search out-of-scope question with API key | LLM answer with "AI-generated" badge | [x] |
+| 5 | Clear API key | Key removed, status resets | [x] |
 
 ## Step 4: Verify Browser SpeechSynthesis (Booth TTS)
 
 | # | Test | Expected Result | Pass? |
 |---|------|-----------------|-------|
-| 1 | Read-aloud button on answer (if present) | Browser speaks the answer text | [ ] |
+| 1 | Read-aloud button on answer (if present) | Browser speaks the answer text | [x] |
 
 ## Step 5: Fix Issues
 
-Document any issues found and fix before proceeding to TICKET_230.
+- Fixed: favicon.ico 404 - Added `<link rel="icon" href="data:,">` to index.html and presenter.html
 
 ---
 
@@ -84,13 +84,14 @@ After local verification passes:
 
 ## Acceptance Criteria
 
-- [ ] `index.html` loads locally without errors
-- [ ] Search works for all 182 Q&A pairs
-- [ ] Category filters functional
-- [ ] No console errors
-- [ ] LLM fallback graceful when no API key
-- [ ] All issues found are fixed
-- [ ] Ready for TICKET_230 (GitHub Pages deploy)
+- [x] `index.html` loads locally without errors
+- [x] Search works for all 182 Q&A pairs
+- [x] Category filters functional
+- [x] No console errors
+- [x] LLM fallback graceful when no API key
+- [x] All issues found are fixed
+- [x] Ready for TICKET_230 (GitHub Pages deploy)
+- [x] GitHub Pages live: https://silverstreamai.github.io/NexusFix/chatbot/
 
 ---
 

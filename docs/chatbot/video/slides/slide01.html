@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Slide 1 - Title</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1920px; height: 1080px;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0A1628 0%, #0F2237 50%, #0A1628 100%);
+    color: #FFFFFF;
+    overflow: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: absolute;
+    top: -300px; right: -200px;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(0,188,212,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .slide {
+    position: relative;
+    z-index: 1;
+    width: 1920px; height: 1080px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px;
+  }
+  .logo {
+    width: 120px; height: 120px;
+    background: linear-gradient(135deg, #00BCD4, #1565C0);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 900;
+    font-size: 48px;
+    color: #FFFFFF;
+    margin-bottom: 48px;
+    box-shadow: 0 8px 40px rgba(0,188,212,0.3);
+  }
+  h1 {
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    background: linear-gradient(90deg, #FFFFFF 0%, #80DEEA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 24px;
+  }
+  .subtitle {
+    font-size: 36px;
+    color: #00BCD4;
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 64px;
+  }
+  .conf {
+    font-size: 28px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+  }
+  .conf strong {
+    color: #80DEEA;
+    font-weight: 600;
+  }
+  .author {
+    margin-top: 16px;
+    font-size: 22px;
+    color: rgba(255,255,255,0.35);
+  }
+  .slide-num {
+    position: absolute;
+    bottom: 32px; right: 48px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="logo">NF</div>
+  <h1>NexusFIX</h1>
+  <div class="subtitle">Zero-Cost FIX Engine for Modern C++</div>
+  <div class="conf"><strong>C++Online 2026</strong> Poster Session</div>
+  <div class="author">SilverstreamsAI</div>
+  <div class="slide-num">1 / 15</div>
+</div>
+</body>
+</html>
