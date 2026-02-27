@@ -11,6 +11,70 @@
     var SCORE_ANSWER = 2;
     var LLM_THRESHOLD = 10;
 
+    // === Conversational Intent Detection (TICKET_240) ===
+    var INTENTS = {
+        greeting: {
+            patterns: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'],
+            response: 'Hi! I am the NexusFIX Q&A assistant. Here are some topics you can ask about:'
+        },
+        gratitude: {
+            patterns: ['thank you', 'thanks', 'appreciate', 'cheers'],
+            response: 'You are welcome! Feel free to ask more questions about NexusFIX.'
+        },
+        farewell: {
+            patterns: ['bye', 'goodbye', 'see you', 'take care'],
+            response: 'Goodbye! Visit the poster for more details, or reach out at contact@silverstream.tech.'
+        },
+        vague: {
+            patterns: ['tell me more', 'what', 'huh', 'explain', 'help', 'what can you do'],
+            response: 'I can answer questions about NexusFIX. Pick a topic to get started:'
+        }
+    };
+
+    function detectIntent(query) {
+        var normalized = query.toLowerCase().replace(/[.!?,]/g, '').trim();
+        if (normalized.length < 2) return 'noise';
+
+        var intentNames = Object.keys(INTENTS);
+        for (var i = 0; i < intentNames.length; i++) {
+            var name = intentNames[i];
+            var patterns = INTENTS[name].patterns;
+            for (var p = 0; p < patterns.length; p++) {
+                if (normalized === patterns[p] || normalized.indexOf(patterns[p]) === 0) {
+                    return name;
+                }
+            }
+        }
+        return null;
+    }
+
+    function renderIntentResponse(intentName) {
+        var area = document.getElementById('results-area');
+        if (!area) return true;
+
+        var intent = INTENTS[intentName];
+        var html = '<div class="status-msg">' + escapeHtml(intent.response) + '</div>';
+
+        if (intentName === 'greeting' || intentName === 'vague') {
+            html += renderCategoryButtons();
+        }
+
+        area.innerHTML = html;
+        area.scrollTop = 0;
+        return true;
+    }
+
+    function renderCategoryButtons() {
+        var categories = qaData.categories;
+        var html = '<div class="intent-categories">';
+        for (var i = 0; i < categories.length; i++) {
+            html += '<button class="category-btn intent-cat-btn" data-id="' +
+                categories[i].id + '">' + escapeHtml(categories[i].label) + '</button>';
+        }
+        html += '</div>';
+        return html;
+    }
+
     // === State ===
     var currentCategory = null;
     var searchTimer = null;
@@ -138,6 +202,14 @@
         var area = document.getElementById('results-area');
         if (!area) return;
 
+        // TICKET_240: Intercept conversational input before search rendering
+        var intent = detectIntent(query);
+        if (intent === 'noise') return;
+        if (intent) {
+            renderIntentResponse(intent);
+            return;
+        }
+
         var topScore = results.length > 0 ? results[0].score : 0;
 
         // If no results or top score below threshold, try LLM fallback
@@ -218,8 +290,11 @@
 
     function renderFallbackMsg(query) {
         return '<div class="status-msg">' +
-            'No match found for "' + escapeHtml(query) + '".<br>' +
-            'Try browsing topics above or use different keywords.<br>' +
+            'I did not find a matching Q&A for that.<br>' +
+            'Here are some topics you can ask about:' +
+            '</div>' +
+            renderCategoryButtons() +
+            '<div class="status-msg">' +
             '<span class="fallback-contact">Or contact <strong>contact@silverstream.tech</strong></span>' +
             '</div>';
     }
@@ -451,6 +526,18 @@
                 renderCategoryResults(catId);
             });
         }
+
+        // Intent category buttons (TICKET_240)
+        document.addEventListener('click', function (e) {
+            var btn = e.target;
+            if (!btn.classList.contains('intent-cat-btn')) return;
+
+            var catId = btn.getAttribute('data-id');
+            clearActiveCategory();
+            currentCategory = catId;
+            if (input) input.value = '';
+            renderCategoryResults(catId);
+        });
 
         // Popular questions
         document.addEventListener('click', function (e) {

@@ -550,6 +550,13 @@ mark {
     display: inline-block;
 }
 
+/* === Intent Category Buttons (TICKET_240) === */
+
+.intent-categories {
+    text-align: center;
+    padding: 8px 20px;
+}
+
 /* === Settings Panel === */
 
 .settings-toggle {
